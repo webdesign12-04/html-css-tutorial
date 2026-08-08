@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Infographic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #f4f1eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: #fbf9f5;
+            border-radius: 24px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150px;
+            height: 100%;
+            background: #e6e5e0;
+            border-bottom-right-radius: 120px;
+            border-top-right-radius: 120px;
+            z-index: 1;
+        }
+
+        .fruit-row {
+            display: flex;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .fruit-row:last-of-type {
+            margin-bottom: 15px;
+        }
+
+        .fruit-row:hover {
+            transform: translateY(-4px);
+        }
+
+        .fruit-img-box {
+            width: 115px;
+            height: 115px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0;
+            z-index: 3;
+            background: #fff;
+        }
+
+        .fruit-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .fruit-row:hover .fruit-img-box img {
+            transform: scale(1.1);
+        }
+
+        .fruit-card {
+            flex-grow: 1;
+            margin-left: -20px;
+            padding: 16px 20px 16px 32px;
+            border-radius: 0 25px 25px 0;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+            transition: box-shadow 0.3s ease, filter 0.3s ease;
+        }
+
+        .fruit-row:hover .fruit-card {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+            filter: brightness(1.03);
+        }
+
+        .fruit-card h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .fruit-card p {
+            font-size: 11.5px;
+            line-height: 1.4;
+            opacity: 0.95;
+        }
+
+        .orange-theme {
+            background-color: #ff9100;
+        }
+
+        .banana-theme {
+            background-color: #bfa114;
+        }
+
+        .apple-theme {
+            background-color: #e54236;
+        }
+
+        .strawberry-theme {
+            background-color: #e51d2c;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer p {
+            font-size: 11px;
+            color: #777;
+            margin-bottom: 2px;
+        }
+
+        .footer span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="fruit-row">
+            <div class="fruit-img-box">
+                <img src="https://images.unsplash.com/photo-1547514701-42782101795e?auto=format&fit=crop&w=300&q=80" alt="Orange">
+            </div>
+
+            <div class="fruit-card orange-theme">
+                <h2>Orange</h2>
+                <p>Oranges, which are citrus fruits, contain an abundance of Vitamin C and antioxidants.</p>
+            </div>
+
+        </div>
+
+
+        <div class="fruit-row">
+            <div class="fruit-img-box">
+                <img src="https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=300&q=80" alt="Banana">
+            </div>
+
+            <div class="fruit-card banana-theme">
+                <h2>Banana</h2>
+                <p>An essential health benefit of bananas is serving as a rich source of vitamin C.</p>
+            </div>
+
+        </div>
+
+        <div class="fruit-row">
+            <div class="fruit-img-box">
+                <img src="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=300&q=80" alt="Apple">
+            </div>
+
+            <div class="fruit-card apple-theme">
+                <h2>Apple</h2>
+                <p>Apples are known to be low in calories and contain diverse vitamins and minerals like vitamin A, vitamin B6, vitamin C, and potassium.</p>
+            </div>
+
+        </div>
+
+        <div class="fruit-row">
+            <div class="fruit-img-box">
+                <img src="https://images.unsplash.com/photo-1464965911861-746a04b4bca6?auto=format&fit=crop&w=300&q=80" alt="Strawberry">
+            </div>
+
+            <div class="fruit-card strawberry-theme">
+                <h2>Strawberry</h2>
+                <p>Strawberries are a great source of vitamin C and manganese, while also containing folate (vitamin B9) and potassium.</p>
+            </div>
+
+        </div>
+
+        <div class="footer">
+            <p>YOUTUBE</p>
+            <span>@webdesign12_04</span>
+        </div>
+    </div>
+</body>
+</html> 
+
