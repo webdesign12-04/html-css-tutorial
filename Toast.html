@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toast Notification System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 1.5rem;
+        }
+
+        .control-panel {
+            width: 100%;
+            max-width: 440px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .panel-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .panel-header p {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-toast {
+            height: 48px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-toast:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-toast:active {
+            transform: translateY(0);
+        }
+
+        .btn-success { background: #10b981; color: #022c22; }
+        .btn-error { background: #ef4444; color: #450a0a; }
+        .btn-warning { background: #f59e0b; color: #451a03; }
+        .btn-info { background: #3b82f6; color: #172554; }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 9999;
+            pointer-events: none;
+            max-width: 380px;
+            width: calc(100% - 40px);
+        }
+
+        .toast {
+            pointer-events: auto;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.85rem;
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: all 0.3s ease;
+        }
+
+        .toast.hide {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px) scale(0.9); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0) scale(1); }
+            to { opacity: 0; transform: translateX(100px) scale(0.9); }
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.85rem;
+            font-weight: 800;
+        }
+
+        .toast-success .toast-icon { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .toast-error .toast-icon { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .toast-warning .toast-icon { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .toast-info .toast-icon { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+
+        .toast-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .toast-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .toast-msg {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 2px;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .btn-close:hover {
+            color: #f8fafc;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .toast-progress-fill {
+            height: 100%;
+            width: 100%;
+            transition: width linear;
+        }
+
+        .toast-success .toast-progress-fill { background: #10b981; }
+        .toast-error .toast-progress-fill { background: #ef4444; }
+        .toast-warning .toast-progress-fill { background: #f59e0b; }
+        .toast-info .toast-progress-fill { background: #3b82f6; }
+    </style>
+</head>
+<body>
+
+    <main class="control-panel">
+        <header class="panel-header">
+            <h2>Toast Notification System</h2>
+            <p>Click any button to trigger live toast alerts.</p>
+        </header>
+
+        <div class="button-grid">
+            <button class="btn-toast btn-success" onclick="showToast('success')">✓ Success</button>
+            <button class="btn-toast btn-error" onclick="showToast('error')">✕ Error</button>
+            <button class="btn-toast btn-warning" onclick="showToast('warning')">⚠ Warning</button>
+            <button class="btn-toast btn-info" onclick="showToast('info')">ℹ Info</button>
+        </div>
+    </main>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const toastData = {
+            success: {
+                title: "Action Successful",
+                msg: "Your changes have been saved to the cloud."
+            },
+            error: {
+                title: "Network Error",
+                msg: "Failed to sync data with the server."
+            },
+            warning: {
+                title: "Storage Limit",
+                msg: "Your account is at 90% storage capacity."
+            },
+            info: {
+                title: "New Update Available",
+                msg: "Version 2.4 is ready to install."
+            }
+        };
+
+        function showToast(type, duration = 4000) {
+            const container = document.getElementById('toastContainer');
+            const data = toastData[type];
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            const iconText = type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'warning' ? '!' : 'i';
+
+            toast.innerHTML = `
+                <div class="toast-icon">${iconText}</div>
+                <div class="toast-body">
+                    <div class="toast-title">${data.title}</div>
+                    <div class="toast-msg">${data.msg}</div>
+                </div>
+                <button class="btn-close" onclick="removeToast(this.parentElement)">✕</button>
+                <div class="toast-progress">
+                    <div class="toast-progress-fill"></div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            const progressFill = toast.querySelector('.toast-progress-fill');
+            
+            requestAnimationFrame(() => {
+                progressFill.style.transitionDuration = `${duration}ms`;
+                progressFill.style.width = '0%';
+            });
+
+            const timer = setTimeout(() => {
+                removeToast(toast);
+            }, duration);
+
+            toast.dataset.timer = timer;
+        }
+
+        function removeToast(toast) {
+            if (toast.classList.contains('hide')) return;
+            clearTimeout(toast.dataset.timer);
+            toast.classList.add('hide');
+            toast.addEventListener('animationend', () => toast.remove());
+        }
+    </script>
+</body>
+</html>
