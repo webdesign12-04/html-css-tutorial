@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18 Loaders - 4 Rows (No Scroll)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .grid-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px 35px;
+            width: 95vw;
+            max-width: 820px;
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            height: 85px;
+            width: 120px;
+        }
+
+        .loader-wrap {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0.85); 
+        }
+
+        .name {
+            font-size: 11px;
+            color: #888;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        :root {
+            --c: #e56855;
+            --g: #a2c17e;
+            --o: #f5b154;
+            --p: #f28b97;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .squares { width: 44px; height: 44px; position: relative; animation: spin-step 2s infinite linear; }
+        .squares span { position: absolute; width: 20px; height: 20px; border-radius: 4px; }
+        .squares span:nth-child(1) { top: 0; left: 0; background: var(--c); }
+        .squares span:nth-child(2) { top: 0; right: 0; background: var(--g); }
+        .squares span:nth-child(3) { bottom: 0; left: 0; background: var(--o); }
+        @keyframes spin-step { 0%,20%{transform:rotate(0deg)} 25%,45%{transform:rotate(90deg)} 50%,70%{transform:rotate(180deg)} 75%,95%{transform:rotate(270deg)} 100%{transform:rotate(360deg)} }
+
+        .dots-ring { width: 50px; height: 50px; position: relative; animation: spin 3s linear infinite; }
+        .dots-ring span { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: -4px; left: 21px; transform-origin: 4px 29px; }
+        .dots-ring span:nth-child(1){background:var(--g);transform:rotate(0deg)} .dots-ring span:nth-child(2){background:var(--c);transform:rotate(60deg)} .dots-ring span:nth-child(3){background:var(--o);transform:rotate(120deg)} .dots-ring span:nth-child(4){background:var(--p);transform:rotate(180deg)} .dots-ring span:nth-child(5){background:var(--g);transform:rotate(240deg)} .dots-ring span:nth-child(6){background:var(--c);transform:rotate(300deg)}
+
+        .color-arcs { width: 40px; height: 40px; border-radius: 50%; border: 4px solid transparent; border-top-color: var(--g); border-right-color: var(--c); border-bottom-color: var(--o); border-left-color: var(--p); animation: spin 1.5s ease-in-out infinite; }
+
+        .dash-circle { width: 40px; height: 40px; border-radius: 50%; border: 4px dashed var(--c); animation: spin 3s linear infinite; }
+
+        .gears { position: relative; width: 50px; height: 50px; }
+        .gears svg { position: absolute; width: 28px; height: 28px; }
+        .gears svg:nth-child(1) { top: 0; left: 0; fill: var(--c); animation: spin 2s linear infinite; }
+        .gears svg:nth-child(2) { bottom: 0; right: 0; width: 24px; height: 24px; fill: var(--o); animation: spin 2s linear infinite reverse; }
+
+        .inner-orbit { width: 40px; height: 40px; background: var(--c); border-radius: 50%; position: relative; }
+        .inner-orbit::after { content: ''; position: absolute; width: 8px; height: 8px; background: #fff; border-radius: 50%; top: 4px; left: 50%; transform: translateX(-50%); transform-origin: 4px 16px; animation: spin 1s linear infinite; }
+
+        .pinwheel { width: 40px; height: 40px; border-radius: 50%; background: conic-gradient(var(--c) 0 45deg, var(--g) 45deg 90deg, var(--o) 90deg 135deg, var(--p) 135deg 180deg, var(--c) 180deg 225deg, var(--g) 225deg 270deg, var(--o) 270deg 315deg, var(--p) 315deg 360deg); animation: spin 1.5s linear infinite; position: relative; }
+        .pinwheel::after { content: ''; position: absolute; width: 12px; height: 12px; background: #0a0a0a; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        .sync-arrows { width: 35px; height: 35px; position: relative; }
+        .sync-arrows::before, .sync-arrows::after { content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 3px solid transparent; }
+        .sync-arrows::before { border-top-color: var(--o); border-right-color: var(--o); animation: spin 1.5s linear infinite; }
+        .sync-arrows::after { border-bottom-color: var(--c); border-left-color: var(--c); animation: spin 1.5s linear infinite reverse; }
+
+        .comets { width: 40px; height: 40px; position: relative; animation: spin 1.5s linear infinite; }
+        .comets span { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--o); box-shadow: -4px 4px 0 -1px var(--o), -8px 8px 0 -2px var(--o); top: 0; left: 50%; }
+        .comets span:nth-child(2) { background: var(--g); box-shadow: -4px -4px 0 -1px var(--g), -8px -8px 0 -2px var(--g); top: 50%; right: 0; left: auto; }
+
+        .leaf-ring { width: 45px; height: 45px; position: relative; animation: spin 4s linear infinite; }
+        .leaf-ring span { position: absolute; width: 10px; height: 10px; border-radius: 50% 0 50% 0; top: 17.5px; left: 17.5px; }
+        .leaf-ring span:nth-child(1){background:var(--g);transform:rotate(0deg) translate(18px)} .leaf-ring span:nth-child(2){background:var(--c);transform:rotate(45deg) translate(18px)} .leaf-ring span:nth-child(3){background:var(--o);transform:rotate(90deg) translate(18px)} .leaf-ring span:nth-child(4){background:var(--p);transform:rotate(135deg) translate(18px)} .leaf-ring span:nth-child(5){background:var(--g);transform:rotate(180deg) translate(18px)} .leaf-ring span:nth-child(6){background:var(--c);transform:rotate(225deg) translate(18px)} .leaf-ring span:nth-child(7){background:var(--o);transform:rotate(270deg) translate(18px)} .leaf-ring span:nth-child(8){background:var(--p);transform:rotate(315deg) translate(18px)}
+
+        .petal-burst { width: 45px; height: 45px; position: relative; }
+        .petal-burst span { position: absolute; width: 10px; height: 10px; border-radius: 50% 0 50% 0; top: 17.5px; left: 17.5px; background: var(--p); animation: pulse-fade 1.2s infinite alternate; }
+        @keyframes pulse-fade { 0% { transform: scale(0.8) rotate(var(--deg)) translate(12px); opacity: 0.3; } 100% { transform: scale(1.2) rotate(var(--deg)) translate(18px); opacity: 1; } }
+
+        .wave-dots { display: flex; gap: 5px; }
+        .wave-dots span { width: 8px; height: 8px; border-radius: 50%; animation: wave 0.8s infinite ease-in-out alternate; }
+        .wave-dots span:nth-child(1){background:var(--p);animation-delay:0s} .wave-dots span:nth-child(2){background:var(--c);animation-delay:0.15s} .wave-dots span:nth-child(3){background:var(--o);animation-delay:0.3s} .wave-dots span:nth-child(4){background:var(--g);animation-delay:0.45s}
+        @keyframes wave { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
+
+        .corner-pulse { width: 30px; height: 30px; display: flex; flex-wrap: wrap; justify-content: space-between; align-content: space-between; animation: spin 3s infinite linear; }
+        .corner-pulse span { width: 10px; height: 10px; border-radius: 50%; background: var(--c); animation: pulse 1s infinite alternate; }
+        .corner-pulse span:nth-child(2){animation-delay:0.2s} .corner-pulse span:nth-child(3){animation-delay:0.4s} .corner-pulse span:nth-child(4){animation-delay:0.6s}
+        @keyframes pulse { 0% { transform: scale(0.6); opacity: 0.5; } 100% { transform: scale(1.2); opacity: 1; } }
+
+        .leapfrog { display: flex; gap: 6px; }
+        .leapfrog span { width: 9px; height: 9px; border-radius: 50%; }
+        .leapfrog span:nth-child(1) { background: var(--o); } .leapfrog span:nth-child(2) { background: var(--o); opacity: 0.6; } .leapfrog span:nth-child(3) { background: var(--g); position: relative; animation: jump 1s infinite ease-in-out; }
+        @keyframes jump { 0% { transform: translate(0,0); } 50% { transform: translate(-30px,-15px); } 100% { transform: translate(-30px,0); } }
+
+        .diagonal-dots { position: relative; width: 35px; height: 35px; }
+        .diagonal-dots span { position: absolute; width: 9px; height: 9px; border-radius: 50%; animation: pulse 1s infinite alternate; }
+        .diagonal-dots span:nth-child(1){background:var(--p);top:0;left:0;animation-delay:0s} .diagonal-dots span:nth-child(2){background:var(--c);top:13px;left:13px;animation-delay:0.2s} .diagonal-dots span:nth-child(3){background:var(--g);top:26px;left:26px;animation-delay:0.4s}
+
+        .equalizer { display: flex; gap: 4px; align-items: center; height: 25px; }
+        .equalizer span { width: 5px; border-radius: 4px; animation: eq 0.6s infinite ease-in-out alternate; }
+        .equalizer span:nth-child(1){height:10px;background:var(--c);animation-delay:0s} .equalizer span:nth-child(2){height:20px;background:var(--p);animation-delay:0.2s} .equalizer span:nth-child(3){height:15px;background:var(--c);animation-delay:0.4s} .equalizer span:nth-child(4){height:25px;background:var(--p);animation-delay:0.1s}
+        @keyframes eq { 0% { transform: scaleY(0.5); } 100% { transform: scaleY(1.2); } }
+
+        .crawl-dots { display: flex; gap: 5px; }
+        .crawl-dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--c); animation: fade-crawl 1s infinite; }
+        .crawl-dots span:nth-child(1){animation-delay:0s} .crawl-dots span:nth-child(2){animation-delay:0.2s} .crawl-dots span:nth-child(3){animation-delay:0.4s} .crawl-dots span:nth-child(4){animation-delay:0.6s}
+        @keyframes fade-crawl { 0%,100%{opacity:0;transform:scale(0.5)} 50%{opacity:1;transform:scale(1)} }
+
+        .dots-dance { width: 22px; height: 22px; display: flex; flex-wrap: wrap; gap: 4px; animation: spin 1.2s infinite ease-in-out; }
+        .dots-dance span { width: 9px; height: 9px; border-radius: 50%; }
+        .dots-dance span:nth-child(1){background:var(--p)} .dots-dance span:nth-child(2){background:var(--c)} .dots-dance span:nth-child(3){background:var(--g)} .dots-dance span:nth-child(4){background:var(--o)}
+    </style>
+</head>
+<body>
+
+    <div class="grid-container">
+        <div class="item"><div class="loader-wrap"><div class="squares"><span></span><span></span><span></span></div></div><div class="name">Sliding Squares</div></div>
+        <div class="item"><div class="loader-wrap"><div class="dots-ring"><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="name">Orbit Ring</div></div>
+        <div class="item"><div class="loader-wrap"><div class="color-arcs"></div></div><div class="name">4-Color Arcs</div></div>
+        <div class="item"><div class="loader-wrap"><div class="dash-circle"></div></div><div class="name">Dash Circle</div></div>
+        <div class="item"><div class="loader-wrap"><div class="gears"><svg viewBox="0 0 100 100"><path d="M91 41.5l-8.6-1.5c-1-3.6-2.6-7-4.8-10l5.4-6.8c1.7-2.1 1.4-5.2-.6-7l-7.3-7.3c-1.9-1.9-5-2.2-7.1-.5L61 13.9c-2.9-2.2-6.3-3.8-9.9-4.8L49.6 0h-10l-1.5 8.7c-3.6 1-7 2.6-9.9 4.8l-7.1-5.5c-2.1-1.6-5.2-1.3-7.1.6l-7.3 7.3c-1.9 1.9-2.2 5-.5 7.1l5.5 7.1c-2.2 2.9-3.8 6.3-4.8 9.9L0 41.5v10l8.7 1.5c1 3.6 2.6 7 4.8 9.9l-5.5 7.1c-1.6 2.1-1.3 5.2.6 7.1l7.3 7.3c1.9 1.9 5 2.2 7.1.5l7.1-5.5c2.9 2.2 6.3 3.8 9.9 4.8L41.5 93h10l1.5-8.7c3.6-1 7-2.6 9.9-4.8l7.1 5.5c2.1 1.6 5.2 1.3 7.1-.6l7.3-7.3c1.9-1.9 2.2-5 .5-7.1l-5.5-7.1c2.2-2.9 3.8-6.3 4.8-9.9L93 51.5v-10zM46.5 68A21.5 21.5 0 1 1 68 46.5 21.5 21.5 0 0 1 46.5 68z"/></svg><svg viewBox="0 0 100 100"><path d="M91 41.5l-8.6-1.5c-1-3.6-2.6-7-4.8-10l5.4-6.8c1.7-2.1 1.4-5.2-.6-7l-7.3-7.3c-1.9-1.9-5-2.2-7.1-.5L61 13.9c-2.9-2.2-6.3-3.8-9.9-4.8L49.6 0h-10l-1.5 8.7c-3.6 1-7 2.6-9.9 4.8l-7.1-5.5c-2.1-1.6-5.2-1.3-7.1.6l-7.3 7.3c-1.9 1.9-2.2 5-.5 7.1l5.5 7.1c-2.2 2.9-3.8 6.3-4.8 9.9L0 41.5v10l8.7 1.5c1 3.6 2.6 7 4.8 9.9l-5.5 7.1c-1.6 2.1-1.3 5.2.6 7.1l7.3 7.3c1.9 1.9 5 2.2 7.1.5l7.1-5.5c2.9 2.2 6.3 3.8 9.9 4.8L41.5 93h10l1.5-8.7c3.6-1 7-2.6 9.9-4.8l7.1 5.5c2.1 1.6 5.2 1.3 7.1-.6l7.3-7.3c1.9-1.9 2.2-5 .5-7.1l-5.5-7.1c2.2-2.9 3.8-6.3 4.8-9.9L93 51.5v-10zM46.5 68A21.5 21.5 0 1 1 68 46.5 21.5 21.5 0 0 1 46.5 68z"/></svg></div></div><div class="name">Dual Gears</div></div>
+        
+        <div class="item"><div class="loader-wrap"><div class="inner-orbit"></div></div><div class="name">Inner Orbit</div></div>
+        <div class="item"><div class="loader-wrap"><div class="pinwheel"></div></div><div class="name">Pinwheel</div></div>
+        <div class="item"><div class="loader-wrap"><div class="sync-arrows"></div></div><div class="name">Sync Arrows</div></div>
+        <div class="item"><div class="loader-wrap"><div class="comets"><span></span><span></span></div></div><div class="name">Comets</div></div>
+        <div class="item"><div class="loader-wrap"><div class="leaf-ring"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div><div class="name">Leaf Ring</div></div>
+        
+        <div class="item"><div class="loader-wrap"><div class="petal-burst"><span style="--deg:0deg"></span><span style="--deg:45deg"></span><span style="--deg:90deg"></span><span style="--deg:135deg"></span><span style="--deg:180deg"></span><span style="--deg:225deg"></span><span style="--deg:270deg"></span><span style="--deg:315deg"></span></div></div><div class="name">Petal Burst</div></div>
+        <div class="item"><div class="loader-wrap"><div class="wave-dots"><span></span><span></span><span></span><span></span></div></div><div class="name">Wave Dots</div></div>
+        <div class="item"><div class="loader-wrap"><div class="corner-pulse"><span></span><span></span><span></span><span></span></div></div><div class="name">Corner Pulse</div></div>
+        <div class="item"><div class="loader-wrap"><div class="leapfrog"><span></span><span></span><span></span></div></div><div class="name">Leapfrog</div></div>
+        <div class="item"><div class="loader-wrap"><div class="diagonal-dots"><span></span><span></span><span></span></div></div><div class="name">Diagonal Dots</div></div>
+        
+        <div class="item"><div class="loader-wrap"><div class="equalizer"><span></span><span></span><span></span><span></span></div></div><div class="name">Equalizer</div></div>
+        <div class="item"><div class="loader-wrap"><div class="crawl-dots"><span></span><span></span><span></span><span></span></div></div><div class="name">Crawl Dots</div></div>
+        <div class="item"><div class="loader-wrap"><div class="dots-dance"><span></span><span></span><span></span><span></span></div></div><div class="name">Dots Dance</div></div>
+    </div>
+
+</body>
+</html>
