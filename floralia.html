@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FLORALIA | Artisanal Botanical Studio</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary-sage: #4a5d4e;
+      --sage-dark: #2f3e32;
+      --blush-light: #fbf6f0;
+      --petal-pink: #d99b9b;
+      --gold-accent: #c49e5d;
+      --card-bg: #ffffff;
+      --text-dark: #222523;
+      --text-muted: #6b736d;
+      --border-soft: rgba(74, 93, 78, 0.15);
+      --transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--blush-light);
+      color: var(--text-dark);
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, .serif-font {
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .brand-tag {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(47, 62, 50, 0.9);
+      color: #fff;
+      padding: 7px 16px;
+      border-radius: 30px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      z-index: 999;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 8%;
+      background: rgba(251, 246, 240, 0.92);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      border-bottom: 1px solid var(--border-soft);
+      transition: var(--transition);
+    }
+
+    .nav-logo {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--sage-dark);
+      text-decoration: none;
+    }
+    .nav-logo span {
+      color: var(--petal-pink);
+      font-style: italic;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-dark);
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--gold-accent);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .cart-btn-trigger {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--sage-dark);
+      transition: var(--transition);
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      background: var(--petal-pink);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 130px 8% 80px;
+      background: linear-gradient(rgba(251, 246, 240, 0.65), rgba(251, 246, 240, 0.8)),
+                  url('https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=1600&auto=format&fit=crop&q=80') center/cover no-repeat;
+    }
+
+    .hero-content {
+      max-width: 620px;
+    }
+
+    .hero-pre {
+      font-size: 13px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--primary-sage);
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .hero-title {
+      font-size: clamp(48px, 8vw, 84px);
+      line-height: 1.08;
+      margin-bottom: 20px;
+      color: var(--sage-dark);
+      font-weight: 400;
+    }
+    .hero-title span {
+      font-style: italic;
+      color: var(--petal-pink);
+    }
+
+    .hero-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 35px;
+      line-height: 1.8;
+    }
+
+    .btn-flora {
+      background: var(--primary-sage);
+      color: #fff;
+      padding: 14px 34px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+      box-shadow: 0 8px 20px rgba(74, 93, 78, 0.25);
+      transition: var(--transition);
+    }
+
+    .btn-flora:hover {
+      background: var(--sage-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(74, 93, 78, 0.35);
+    }
+
+    section {
+      padding: 100px 8%;
+    }
+
+    .sec-head {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+
+    .sec-sub {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--petal-pink);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .sec-title {
+      font-size: 46px;
+      color: var(--sage-dark);
+      font-weight: 400;
+    }
+
+    .filter-pills {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: none;
+      border: 1px solid var(--border-soft);
+      padding: 8px 22px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-dark);
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--primary-sage);
+      color: #fff;
+      border-color: var(--primary-sage);
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .flower-card {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+      border: 1px solid var(--border-soft);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .flower-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    }
+
+    .flower-img-wrap {
+      width: 100%;
+      height: 320px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .flower-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .flower-card:hover .flower-img-wrap img {
+      transform: scale(1.08);
+    }
+
+    .flower-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .flower-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--petal-pink);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .flower-title {
+      font-size: 26px;
+      color: var(--sage-dark);
+      margin-bottom: 8px;
+    }
+
+    .flower-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      flex-grow: 1;
+    }
+
+    .flower-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      padding-top: 16px;
+    }
+
+    .flower-price {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--primary-sage);
+      font-family: 'Cormorant Garamond', serif;
+    }
+
+    .btn-add-cart {
+      background: none;
+      border: 1px solid var(--primary-sage);
+      color: var(--primary-sage);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-add-cart:hover {
+      background: var(--primary-sage);
+      color: #fff;
+    }
+
+    .customizer-box {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.06);
+      border: 1px solid var(--border-soft);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .custom-preview {
+      border-radius: 14px;
+      overflow: hidden;
+      height: 380px;
+    }
+
+    .custom-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .options-group {
+      margin-bottom: 20px;
+    }
+
+    .options-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      color: var(--sage-dark);
+    }
+
+    .select-input {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-soft);
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      background: var(--blush-light);
+    }
+
+    .total-cost-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 25px 0 20px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 100%;
+      max-width: 400px;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      padding: 30px;
+    }
+
+    .cart-drawer.open {
+      right: 0;
+    }
+
+    .cart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .cart-head h3 {
+      font-size: 26px;
+      color: var(--sage-dark);
+    }
+
+    .close-cart {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .cart-items-container {
+      flex-grow: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--blush-light);
+      border-radius: 10px;
+    }
+
+    .cart-item-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .cart-item-price {
+      font-size: 13px;
+      color: var(--primary-sage);
+      font-weight: 700;
+    }
+
+    .remove-btn {
+      background: none;
+      border: none;
+      color: #b94a48;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .cart-bottom {
+      padding-top: 20px;
+      border-top: 1px solid var(--border-soft);
+    }
+
+    .cart-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: var(--sage-dark);
+    }
+
+    footer {
+      background: var(--sage-dark);
+      color: #fff;
+      padding: 60px 8% 30px;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-size: 32px;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .footer-desc {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      max-width: 500px;
+      margin: 0 auto 30px;
+    }
+
+    .footer-bottom {
+      padding-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .footer-bottom span {
+      color: var(--petal-pink);
+      font-weight: 700;
+    }
+
+    @media (max-width: 850px) {
+      .nav-links { display: none; }
+      .customizer-box { grid-template-columns: 1fr; }
+      .custom-preview { height: 260px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="brand-tag">@webdesign12_04</div>
+
+  <nav>
+    <a href="#" class="nav-logo">Flora<span>lia</span></a>
+    <ul class="nav-links">
+      <li><a href="#catalog">Collection</a></li>
+      <li><a href="#customizer">Custom Builder</a></li>
+      <li><a href="#about">Philosophy</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="cart-btn-trigger" onclick="toggleCart()">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span class="cart-count" id="cart-counter">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-content">
+      <span class="hero-pre">Artisanal Floristry & Botanical Care</span>
+      <h1 class="hero-title">Poetry sculpted in <span>Petals</span> & Fragrance</h1>
+      <p class="hero-desc">Sustainably sourced heritage blooms hand-arranged with mindful reverence to bring natural elegance and romance into your spaces.</p>
+      <a href="#catalog" class="btn-flora">Discover Arrangements</a>
+    </div>
+  </header>
+
+  <section id="catalog">
+    <div class="sec-head">
+      <p class="sec-sub">Seasonal Offerings</p>
+      <h2 class="sec-title">The Curated Stems</h2>
+    </div>
+
+    <div class="filter-pills">
+      <button class="filter-btn active" onclick="filterCatalog('all')">All Stems</button>
+      <button class="filter-btn" onclick="filterCatalog('roses')">Heritage Roses</button>
+      <button class="filter-btn" onclick="filterCatalog('pastels')">Pastel Harmonies</button>
+      <button class="filter-btn" onclick="filterCatalog('dried')">Wild & Dried</button>
+    </div>
+
+    <div class="catalog-grid" id="catalog-container"></div>
+  </section>
+
+  <section id="customizer" style="background: rgba(255,255,255,0.4);">
+    <div class="sec-head">
+      <p class="sec-sub">Made Just For You</p>
+      <h2 class="sec-title">Bespoke Bouquet Builder</h2>
+    </div>
+
+    <div class="customizer-box">
+      <div class="custom-preview">
+        <img src="https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=800&auto=format&fit=crop&q=80" alt="Bespoke Florals" />
+      </div>
+
+      <div class="custom-form">
+        <div class="options-group">
+          <label>Primary Blossom Base</label>
+          <select class="select-input" id="base-flower" onchange="updateCustomPrice()">
+            <option value="45" selected>David Austin Peonies ($45)</option>
+            <option value="55">White Ranunculus & Hydrangeas ($55)</option>
+            <option value="60">Cascade Orchids ($60)</option>
+          </select>
+        </div>
+
+        <div class="options-group">
+          <label>Foliage & Filler Accents</label>
+          <select class="select-input" id="foliage" onchange="updateCustomPrice()">
+            <option value="15" selected>Silver Dollar Eucalyptus ($15)</option>
+            <option value="20">Olive Branches & Waxflower ($20)</option>
+            <option value="25">Dried Pampas & Dusty Miller ($25)</option>
+          </select>
+        </div>
+
+        <div class="options-group">
+          <label>Vessel Style</label>
+          <select class="select-input" id="vessel" onchange="updateCustomPrice()">
+            <option value="20" selected>Ribbon Tied Kraft Wrap ($20)</option>
+            <option value="35">Hand-thrown Ceramic Pot ($35)</option>
+            <option value="40">Fluted Smoked Glass Vase ($40)</option>
+          </select>
+        </div>
+
+        <div class="total-cost-row">
+          <span style="font-weight: 600; font-size: 14px;">Total Price:</span>
+          <span style="font-size: 28px; font-weight: 700; color: var(--primary-sage);" id="custom-price-display">$80</span>
+        </div>
+
+        <button class="btn-flora" style="width: 100%;" onclick="addCustomToCart()">Add Custom Bouquet</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="cart-head">
+      <h3>Your Bag</h3>
+      <button class="close-cart" onclick="toggleCart()">&times;</button>
+    </div>
+
+    <div class="cart-items-container" id="cart-items">
+      <p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 40px;">Your bag is currently empty.</p>
+    </div>
+
+    <div class="cart-bottom">
+      <div class="cart-total-row">
+        <span>Subtotal:</span>
+        <span id="cart-subtotal">$0</span>
+      </div>
+      <button class="btn-flora" style="width: 100%;" onclick="checkout()">Proceed to Checkout</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">FLORALIA</div>
+    <p class="footer-desc">Crafting meaningful botanical memories with natural stewardship and timeless floral elegance.</p>
+    <div class="footer-bottom">
+      &copy; 2026 Floralia Botanicals. Developed by <span>@webdesign12_04</span>
+    </div>
+  </footer>
+
+  <script>
+    const inventory = [
+      {
+        id: 1,
+        title: "Morning Sunburst",
+        category: "roses",
+        tag: "Heritage Rose",
+        desc: "Peach Juliet garden roses accented with wild jasmine and dried amaranth.",
+        price: 75,
+        img: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 2,
+        title: "Verdant Serenade",
+        category: "pastels",
+        tag: "Pastel Harmony",
+        desc: "Cream lisianthus paired with delicate sweet peas and silvery foliage.",
+        price: 88,
+        img: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 3,
+        title: "Dusk Reverie",
+        category: "dried",
+        tag: "Wild & Dried",
+        desc: "Preserved bank-side reeds, bleached pampas grass, and blush strawflowers.",
+        price: 65,
+        img: "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&auto=format&fit=crop&q=80"
+      },
+      {
+        id: 4,
+        title: "Velvet Crimson",
+        category: "roses",
+        tag: "Heritage Rose",
+        desc: "Deep scarlet velvety roses blooming with dense petals and lush foliage.",
+        price: 95,
+        img: "velvet_rose.avif"
+      }
+    ];
+
+    let cart = [];
+
+    function renderCatalog(items) {
+      const container = document.getElementById("catalog-container");
+      container.innerHTML = items.map(item => `
+        <div class="flower-card">
+          <div class="flower-img-wrap">
+            <img src="${item.img}" alt="${item.title}">
+          </div>
+          <div class="flower-body">
+            <div class="flower-tag">${item.tag}</div>
+            <h3 class="flower-title">${item.title}</h3>
+            <p class="flower-desc">${item.desc}</p>
+            <div class="flower-footer">
+              <div class="flower-price">$${item.price}</div>
+              <button class="btn-add-cart" onclick="addToCart('${item.title}', ${item.price})">Add to Bag</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterCatalog(category) {
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      event.target.classList.add("active");
+
+      if (category === 'all') {
+        renderCatalog(inventory);
+      } else {
+        renderCatalog(inventory.filter(i => i.category === category));
+      }
+    }
+
+    function updateCustomPrice() {
+      const base = parseInt(document.getElementById("base-flower").value);
+      const foliage = parseInt(document.getElementById("foliage").value);
+      const vessel = parseInt(document.getElementById("vessel").value);
+      const total = base + foliage + vessel;
+      document.getElementById("custom-price-display").innerText = `$${total}`;
+      return total;
+    }
+
+    function addCustomToCart() {
+      const price = updateCustomPrice();
+      addToCart("Bespoke Custom Bouquet", price);
+    }
+
+    function addToCart(title, price) {
+      cart.push({ title, price });
+      updateCartUI();
+      toggleCart(true);
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      document.getElementById("cart-counter").innerText = cart.length;
+      const itemsContainer = document.getElementById("cart-items");
+      
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = '<p style="font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 40px;">Your bag is currently empty.</p>';
+        document.getElementById("cart-subtotal").innerText = "$0";
+        return;
+      }
+
+      itemsContainer.innerHTML = cart.map((item, idx) => `
+        <div class="cart-item">
+          <div>
+            <div class="cart-item-title">${item.title}</div>
+            <div class="cart-item-price">$${item.price}</div>
+          </div>
+          <button class="remove-btn" onclick="removeFromCart(${idx})">&times; Remove</button>
+        </div>
+      `).join('');
+
+      const total = cart.reduce((sum, item) => sum + item.price, 0);
+      document.getElementById("cart-subtotal").innerText = `$${total}`;
+    }
+
+    function toggleCart(forceOpen = false) {
+      const drawer = document.getElementById("cart-drawer");
+      if (forceOpen) {
+        drawer.classList.add("open");
+      } else {
+        drawer.classList.toggle("open");
+      }
+    }
+
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Your bag is empty.");
+        return;
+      }
+      alert("Order placed successfully! Thank you for supporting sustainable floristry.");
+      cart = [];
+      updateCartUI();
+      toggleCart();
+    }
+
+    renderCatalog(inventory);
+    updateCustomPrice();
+  </script>
+</body>
+</html>
