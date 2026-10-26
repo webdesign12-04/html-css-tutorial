@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AURELIA | Grand Culinary Theater & 3D Dining Experience</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #d4af37;
+      --primary-glow: rgba(212, 175, 55, 0.4);
+      --bg-dark: #0a0b0e;
+      --glass-bg: rgba(18, 22, 34, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --accent-green: #2ecc71;
+      --accent-red: #e74c3c;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-dark);
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-main);
+    }
+
+    #webgl-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: block;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    #webgl-canvas:active {
+      cursor: grabbing;
+    }
+
+    .ui-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65);
+      pointer-events: auto;
+    }
+
+    header {
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 20px;
+    }
+
+    .brand-icon {
+      font-size: 26px;
+      color: var(--primary);
+      filter: drop-shadow(0 0 10px var(--primary-glow));
+    }
+
+    .brand-text h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #fff;
+    }
+
+    .brand-text p {
+      font-size: 0.68rem;
+      color: var(--primary);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .top-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+
+    .btn-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.25s ease;
+    }
+
+    .btn-icon:hover {
+      background: var(--primary);
+      color: #000;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px var(--primary-glow);
+    }
+
+    .camera-switcher {
+      display: flex;
+      background: rgba(0, 0, 0, 0.55);
+      padding: 4px;
+      border-radius: 30px;
+      border: 1px solid var(--glass-border);
+      gap: 4px;
+      pointer-events: auto;
+    }
+
+    .cam-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .cam-btn.active, .cam-btn:hover {
+      background: var(--primary);
+      color: #0d1117;
+    }
+
+    .status-hud {
+      position: absolute;
+      top: 86px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      border-radius: 30px;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      pointer-events: none;
+      animation: pulseGlow 3s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 10px rgba(212, 175, 55, 0.15); }
+      100% { box-shadow: 0 0 24px rgba(212, 175, 55, 0.45); }
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 10px var(--accent-green);
+    }
+
+    #speech-bubble {
+      position: absolute;
+      padding: 9px 16px;
+      background: #ffffff;
+      color: #111;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 12px;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      transform: translate(-50%, -120%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      white-space: nowrap;
+    }
+
+    #speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 8px 8px 0;
+      border-style: solid;
+      border-color: #ffffff transparent;
+      display: block;
+      width: 0;
+    }
+
+    .menu-drawer {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      width: 360px;
+      max-height: calc(100vh - 130px);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 10px;
+    }
+
+    .menu-header h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .menu-header span {
+      font-size: 0.8rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .dish-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      max-height: 260px;
+      padding-right: 4px;
+    }
+
+    .dish-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .dish-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    .dish-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .dish-item:hover, .dish-item.selected {
+      background: rgba(212, 175, 55, 0.18);
+      border-color: var(--primary);
+      transform: translateX(4px);
+    }
+
+    .dish-item .icon {
+      font-size: 22px;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      display: grid;
+      place-items: center;
+      color: var(--primary);
+    }
+
+    .dish-details {
+      flex: 1;
+    }
+
+    .dish-details h4 {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .dish-details p {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .dish-price {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .btn-order-now {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #d4af37, #f39c12);
+      color: #0b0c10;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(212, 175, 55, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .btn-order-now:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(212, 175, 55, 0.55);
+      filter: brightness(1.1);
+    }
+
+    .btn-order-now:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      filter: grayscale(0.8);
+    }
+
+    .cooking-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      padding: 24px 32px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .cooking-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .cooking-modal i {
+      font-size: 38px;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: inline-block;
+      animation: spinCook 2s infinite linear;
+    }
+
+    @keyframes spinCook {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .progress-bar {
+      width: 240px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      margin: 14px auto 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #f1c40f);
+      border-radius: 10px;
+      transition: width 0.1s linear;
+    }
+
+    .bottom-hint {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px 18px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .bottom-hint i {
+      color: var(--primary);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .menu-drawer {
+        width: calc(100% - 40px);
+        bottom: 14px;
+        left: 20px;
+        max-height: 46vh;
+      }
+      .brand-text p, .camera-switcher {
+        display: none;
+      }
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+
+  <canvas id="webgl-canvas"></canvas>
+
+  <div class="ui-layer">
+    <header>
+      <div class="glass-panel brand">
+        <div class="brand-icon"><i class="fa-solid fa-champagne-glasses"></i></div>
+        <div class="brand-text">
+          <h1>AURELIA BISTRO</h1>
+          <p>Interactive Haute Cuisine</p>
+        </div>
+      </div>
+
+      <div class="camera-switcher glass-panel">
+        <button class="cam-btn active" onclick="setCameraView('overview')">Overview</button>
+        <button class="cam-btn" onclick="setCameraView('table')">Table View</button>
+        <button class="cam-btn" onclick="setCameraView('waiter')">Kitchen Post</button>
+        <button class="cam-btn" onclick="setCameraView('cinematic')">Cinematic</button>
+      </div>
+
+      <div class="top-controls">
+        <button class="btn-icon glass-panel" id="btn-audio" title="Toggle Ambience Sound" onclick="toggleAudio()">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+        <button class="btn-icon glass-panel" id="btn-reset" title="Reset Scene" onclick="resetDiningSession()">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </header>
+
+    <div class="status-hud glass-panel">
+      <div class="status-dot"></div>
+      <span id="status-message">Customer seated at Table 4. Select a dish to place an order.</span>
+    </div>
+
+    <div id="speech-bubble">"Right away, sir! Taking your order."</div>
+
+    <div class="menu-drawer glass-panel">
+      <div class="menu-header">
+        <h2>Chef's Selection</h2>
+        <span>Table No. 04</span>
+      </div>
+
+      <div class="dish-list">
+        <div class="dish-item selected" onclick="selectDish(0, this)">
+          <div class="icon"><i class="fa-solid fa-pizza-slice"></i></div>
+          <div class="dish-details">
+            <h4>Woodfired Truffle Pizza</h4>
+            <p>San Marzano, fresh mozzarella, black truffle oil</p>
+          </div>
+          <div class="dish-price">$28</div>
+        </div>
+
+        <div class="dish-item" onclick="selectDish(1, this)">
+          <div class="icon"><i class="fa-solid fa-burger"></i></div>
+          <div class="dish-details">
+            <h4>Artisan Angus Burger</h4>
+            <p>Brioche bun, aged cheddar, crispy golden fries</p>
+          </div>
+          <div class="dish-price">$24</div>
+        </div>
+
+        <div class="dish-item" onclick="selectDish(2, this)">
+          <div class="icon"><i class="fa-solid fa-bowl-food"></i></div>
+          <div class="dish-details">
+            <h4>Creamy Tagliatelle Alfredo</h4>
+            <p>Handcrafted pasta, wild mushroom, parmigiano</p>
+          </div>
+          <div class="dish-price">$26</div>
+        </div>
+      </div>
+
+      <button class="btn-order-now" id="btn-order" onclick="initiateOrderSequence()">
+        <i class="fa-solid fa-bell-concierge"></i>
+        <span>Order Selected Dish</span>
+      </button>
+    </div>
+
+    <div class="cooking-modal glass-panel" id="cooking-modal">
+      <i class="fa-solid fa-utensils"></i>
+      <h3 id="cooking-title">Executive Chef is Cooking...</h3>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Preparing your gourmet dish with fresh ingredients</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <span style="font-size:0.75rem; color:var(--primary); font-weight:600;" id="progress-text">0%</span>
+    </div>
+
+    <div class="bottom-hint glass-panel">
+      <i class="fa-solid fa-hand-pointer"></i>
+      <span>Left-Click + Drag screen to rotate 360° | Scroll to Zoom</span>
+    </div>
+  </div>
+
+  <script>
+    let audioCtx = null;
+    let audioMuted = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playSound(type) {
+      if (audioMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'bell') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1760, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.8);
+        gain.gain.setValueAtTime(0.32, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.85);
+      } 
+      else if (type === 'footstep') {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(120, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.1);
+        gain.gain.setValueAtTime(0.09, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } 
+      else if (type === 'write') {
+        const bufferSize = audioCtx.sampleRate * 0.12;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 2500;
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+      } 
+      else if (type === 'sizzle') {
+        const bufferSize = audioCtx.sampleRate * 0.5;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.25;
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 1600;
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        noise.start(now);
+      } 
+      else if (type === 'cloche') {
+        [1046.5, 1318.5, 2093.0].forEach((f, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(f, now + idx * 0.05);
+          gain.gain.setValueAtTime(0.16, now + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + idx * 0.05);
+          osc.stop(now + 1.1);
+        });
+      }
+    }
+
+    function toggleAudio() {
+      audioMuted = !audioMuted;
+      const btn = document.getElementById('btn-audio');
+      btn.innerHTML = audioMuted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      btn.style.color = audioMuted ? 'var(--accent-red)' : '#fff';
+    }
+
+    const canvas = document.getElementById('webgl-canvas');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0e1118);
+    scene.fog = new THREE.FogExp2(0x0e1118, 0.03);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 5.0, 7.8);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.maxPolarAngle = Math.PI / 2 - 0.05;
+    controls.minDistance = 2.0;
+    controls.maxDistance = 16.0;
+    controls.target.set(0, 1.2, 0);
+
+    const ambientLight = new THREE.AmbientLight(0xffeedd, 0.7);
+    scene.add(ambientLight);
+
+    const chandelier = new THREE.SpotLight(0xffe6aa, 2.7, 18, Math.PI / 3.4, 0.45, 1.2);
+    chandelier.position.set(0, 7.5, 0);
+    chandelier.target.position.set(0, 0, 0);
+    chandelier.castShadow = true;
+    chandelier.shadow.mapSize.width = 1024;
+    chandelier.shadow.mapSize.height = 1024;
+    scene.add(chandelier);
+    scene.add(chandelier.target);
+
+    const candleLight = new THREE.PointLight(0xff9f43, 1.3, 4, 1.8);
+    candleLight.position.set(0, 1.55, 0);
+    candleLight.castShadow = true;
+    scene.add(candleLight);
+
+    const kitchenGlow = new THREE.PointLight(0x70b0ff, 2.2, 12, 1.5);
+    kitchenGlow.position.set(0, 3.0, -6.5);
+    scene.add(kitchenGlow);
+
+    function createFloorCanvas() {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 512;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#22140d';
+      ctx.fillRect(0, 0, 512, 512);
+
+      ctx.strokeStyle = '#150a05';
+      ctx.lineWidth = 4;
+      const step = 64;
+      for (let x = 0; x <= 512; x += step) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 512); ctx.stroke();
+      }
+      for (let y = 0; y <= 512; y += step) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(512, y); ctx.stroke();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    const floorTexture = createFloorCanvas();
+    floorTexture.wrapS = THREE.RepeatWrapping;
+    floorTexture.wrapT = THREE.RepeatWrapping;
+    floorTexture.repeat.set(8, 8);
+
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(28, 28),
+      new THREE.MeshStandardMaterial({ map: floorTexture, roughness: 0.45, metalness: 0.1 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const wallWoodMat = new THREE.MeshStandardMaterial({ color: 0x1f1712, roughness: 0.6 });
+    const wallUpperMat = new THREE.MeshStandardMaterial({ color: 0x181c26, roughness: 0.9 });
+    const goldTrimMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.3 });
+
+    function buildDecorativeWall(width, height) {
+      const wallGroup = new THREE.Group();
+
+      const upperWall = new THREE.Mesh(new THREE.BoxGeometry(width, height - 2.5, 0.3), wallUpperMat);
+      upperWall.position.y = 2.5 + (height - 2.5) / 2;
+      upperWall.receiveShadow = true;
+      wallGroup.add(upperWall);
+
+      const wainscot = new THREE.Mesh(new THREE.BoxGeometry(width, 2.5, 0.34), wallWoodMat);
+      wainscot.position.y = 1.25;
+      wainscot.receiveShadow = true;
+      wallGroup.add(wainscot);
+
+      const molding = new THREE.Mesh(new THREE.BoxGeometry(width + 0.05, 0.15, 0.4), goldTrimMat);
+      molding.position.y = 2.5;
+      wallGroup.add(molding);
+
+      const baseboard = new THREE.Mesh(new THREE.BoxGeometry(width + 0.05, 0.2, 0.4), wallWoodMat);
+      baseboard.position.y = 0.1;
+      wallGroup.add(baseboard);
+
+      return wallGroup;
+    }
+
+    const backWallGroup = buildDecorativeWall(26, 9);
+    backWallGroup.position.set(0, 0, -8);
+    scene.add(backWallGroup);
+
+    const leftWallGroup = buildDecorativeWall(24, 9);
+    leftWallGroup.position.set(-8.5, 0, 0);
+    leftWallGroup.rotation.y = Math.PI / 2;
+    scene.add(leftWallGroup);
+
+    const rightWallGroup = buildDecorativeWall(24, 9);
+    rightWallGroup.position.set(8.5, 0, 0);
+    rightWallGroup.rotation.y = -Math.PI / 2;
+    scene.add(rightWallGroup);
+
+    function createWallSconce(x, y, z, rotY = 0) {
+      const sconce = new THREE.Group();
+      const mount = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 0.05), goldTrimMat);
+      sconce.add(mount);
+
+      const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.25), goldTrimMat);
+      arm.rotation.x = Math.PI / 2;
+      arm.position.set(0, 0, 0.12);
+      sconce.add(arm);
+
+      const shade = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.08, 0.2, 16),
+        new THREE.MeshStandardMaterial({ color: 0xfff3d4, roughness: 0.3, transparent: true, opacity: 0.85 })
+      );
+      shade.position.set(0, 0.1, 0.22);
+      sconce.add(shade);
+
+      const sconceLight = new THREE.PointLight(0xffb74d, 0.8, 4.5, 2.0);
+      sconceLight.position.set(0, 0.1, 0.26);
+      sconce.add(sconceLight);
+
+      sconce.position.set(x, y, z);
+      sconce.rotation.y = rotY;
+      scene.add(sconce);
+    }
+
+    createWallSconce(-4.5, 3.8, -7.8);
+    createWallSconce(4.5, 3.8, -7.8);
+    createWallSconce(-8.3, 3.8, -2.5, Math.PI / 2);
+    createWallSconce(-8.3, 3.8, 2.5, Math.PI / 2);
+    createWallSconce(8.3, 3.8, -2.5, -Math.PI / 2);
+    createWallSconce(8.3, 3.8, 2.5, -Math.PI / 2);
+
+    function createFramedPainting(x, y, z, rotY = 0, styleIndex = 0) {
+      const painting = new THREE.Group();
+      const frame = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.4, 0.08), goldTrimMat);
+      painting.add(frame);
+
+      const pCanvas = document.createElement('canvas');
+      pCanvas.width = 256;
+      pCanvas.height = 384;
+      const pCtx = pCanvas.getContext('2d');
+      const grad = pCtx.createLinearGradient(0, 0, 256, 384);
+      if (styleIndex === 0) {
+        grad.addColorStop(0, '#1a365d');
+        grad.addColorStop(0.5, '#7c2d12');
+        grad.addColorStop(1, '#1e1b4b');
+      } else {
+        grad.addColorStop(0, '#2d1b4e');
+        grad.addColorStop(0.5, '#831843');
+        grad.addColorStop(1, '#064e3b');
+      }
+      pCtx.fillStyle = grad;
+      pCtx.fillRect(0, 0, 256, 384);
+
+      pCtx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
+      pCtx.lineWidth = 6;
+      pCtx.strokeRect(16, 16, 224, 352);
+
+      const artTexture = new THREE.CanvasTexture(pCanvas);
+      const canvasMesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.6, 2.2),
+        new THREE.MeshStandardMaterial({ map: artTexture, roughness: 0.4 })
+      );
+      canvasMesh.position.z = 0.045;
+      painting.add(canvasMesh);
+
+      painting.position.set(x, y, z);
+      painting.rotation.y = rotY;
+      scene.add(painting);
+    }
+
+    createFramedPainting(-4.8, 4.0, -7.8, 0, 0);
+    createFramedPainting(4.8, 4.0, -7.8, 0, 1);
+    createFramedPainting(-8.3, 4.0, 0, Math.PI / 2, 1);
+    createFramedPainting(8.3, 4.0, 0, -Math.PI / 2, 0);
+
+    function createPottedPlant(x, z, scale = 1.0) {
+      const plantGroup = new THREE.Group();
+
+      const pot = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.38, 0.28, 0.8, 24),
+        new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.3, metalness: 0.1 })
+      );
+      pot.position.y = 0.4;
+      pot.castShadow = true;
+      plantGroup.add(pot);
+
+      const goldRim = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.06, 24), goldTrimMat);
+      goldRim.position.y = 0.78;
+      plantGroup.add(goldRim);
+
+      const soil = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.36, 0.36, 0.05, 16),
+        new THREE.MeshStandardMaterial({ color: 0x24140b, roughness: 0.9 })
+      );
+      soil.position.y = 0.77;
+      plantGroup.add(soil);
+
+      const stemMat = new THREE.MeshStandardMaterial({ color: 0x2e4a1f, roughness: 0.7 });
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x1e5622, roughness: 0.6, side: THREE.DoubleSide });
+
+      for (let i = 0; i < 9; i++) {
+        const stemHeight = 0.9 + Math.random() * 0.5;
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.03, stemHeight, 8), stemMat);
+        const rotY = (i / 9) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+        const tilt = 0.25 + Math.random() * 0.35;
+
+        stem.position.set(Math.cos(rotY) * 0.1, 0.78 + stemHeight / 2, Math.sin(rotY) * 0.1);
+        stem.rotation.y = rotY;
+        stem.rotation.z = tilt;
+        plantGroup.add(stem);
+
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12), leafMat);
+        leaf.scale.set(1.5, 0.06, 0.6);
+        leaf.position.set(
+          stem.position.x + Math.sin(tilt) * (stemHeight / 2),
+          stem.position.y + Math.cos(tilt) * (stemHeight / 2),
+          stem.position.z
+        );
+        leaf.rotation.y = rotY;
+        leaf.rotation.x = Math.PI / 4;
+        plantGroup.add(leaf);
+      }
+
+      plantGroup.scale.set(scale, scale, scale);
+      plantGroup.position.set(x, 0, z);
+      scene.add(plantGroup);
+    }
+
+    createPottedPlant(-6.8, -6.0, 1.2);
+    createPottedPlant(6.8, -6.0, 1.2);
+    createPottedPlant(-6.8, 4.5, 1.2);
+    createPottedPlant(6.8, 4.5, 1.2);
+    createPottedPlant(-4.0, 1.0, 0.9);
+    createPottedPlant(4.0, 1.0, 0.9);
+
+    function createBackgroundTable(x, z) {
+      const bgTable = new THREE.Group();
+      const bBase = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.06, 24), new THREE.MeshStandardMaterial({ color: 0x111111 }));
+      bBase.position.y = 0.03;
+      bgTable.add(bBase);
+
+      const bPole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 1.2, 16), goldTrimMat);
+      bPole.position.y = 0.63;
+      bgTable.add(bPole);
+
+      const bTop = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 0.06, 32), new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.8 }));
+      bTop.position.y = 1.25;
+      bgTable.add(bTop);
+
+      const bgCandle = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.05, 0.2, 12), goldTrimMat);
+      bgCandle.position.y = 1.35;
+      bgTable.add(bgCandle);
+
+      const bgFlame = new THREE.Mesh(new THREE.ConeGeometry(0.02, 0.06, 8), new THREE.MeshBasicMaterial({ color: 0xffb74d }));
+      bgFlame.position.y = 1.48;
+      bgTable.add(bgFlame);
+
+      bgTable.position.set(x, 0, z);
+      scene.add(bgTable);
+    }
+
+    createBackgroundTable(-4.8, -2.5);
+    createBackgroundTable(4.8, -2.5);
+
+    const kitchenCounter = new THREE.Mesh(
+      new THREE.BoxGeometry(6.6, 1.25, 1.4),
+      new THREE.MeshStandardMaterial({ color: 0x3d2719, roughness: 0.3, metalness: 0.15 })
+    );
+    kitchenCounter.position.set(0, 0.625, -6.8);
+    kitchenCounter.castShadow = true;
+    kitchenCounter.receiveShadow = true;
+    scene.add(kitchenCounter);
+
+    const counterTop = new THREE.Mesh(
+      new THREE.BoxGeometry(6.8, 0.1, 1.55),
+      new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.2, metalness: 0.3 })
+    );
+    counterTop.position.set(0, 1.28, -6.8);
+    counterTop.castShadow = true;
+    scene.add(counterTop);
+
+    const signBoard = new THREE.Mesh(
+      new THREE.BoxGeometry(3.2, 0.75, 0.08),
+      new THREE.MeshStandardMaterial({ color: 0x0f1118, roughness: 0.5 })
+    );
+    signBoard.position.set(0, 3.4, -7.7);
+    scene.add(signBoard);
+
+    const signCanvas = document.createElement('canvas');
+    signCanvas.width = 512;
+    signCanvas.height = 128;
+    const sCtx = signCanvas.getContext('2d');
+    sCtx.fillStyle = '#0f1118';
+    sCtx.fillRect(0,0,512,128);
+    sCtx.fillStyle = '#d4af37';
+    sCtx.font = 'bold 52px Cinzel, serif';
+    sCtx.textAlign = 'center';
+    sCtx.textBaseline = 'middle';
+    sCtx.fillText('★ KITCHEN PASS ★', 256, 64);
+
+    const signTex = new THREE.CanvasTexture(signCanvas);
+    const signFront = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.1, 0.68),
+      new THREE.MeshBasicMaterial({ map: signTex })
+    );
+    signFront.position.set(0, 3.4, -7.64);
+    scene.add(signFront);
+
+    const tableGroup = new THREE.Group();
+
+    const tableBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.7, 0.85, 0.08, 32),
+      new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.7, roughness: 0.3 })
+    );
+    tableBase.position.y = 0.04;
+    tableBase.castShadow = true;
+    tableGroup.add(tableBase);
+
+    const tablePillar = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.12, 0.16, 1.2, 24),
+      new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.85, roughness: 0.25 })
+    );
+    tablePillar.position.y = 0.65;
+    tablePillar.castShadow = true;
+    tableGroup.add(tablePillar);
+
+    const tableTop = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.4, 1.4, 0.08, 48),
+      new THREE.MeshStandardMaterial({ color: 0x3d2719, roughness: 0.35, metalness: 0.1 })
+    );
+    tableTop.position.y = 1.27;
+    tableTop.castShadow = true;
+    tableTop.receiveShadow = true;
+    tableGroup.add(tableTop);
+
+    const cloth = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.28, 1.35, 0.04, 48),
+      new THREE.MeshStandardMaterial({ color: 0xf6f6f6, roughness: 0.9 })
+    );
+    cloth.position.y = 1.31;
+    cloth.receiveShadow = true;
+    tableGroup.add(cloth);
+
+    const placemat = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.55, 0.55, 0.005, 32),
+      new THREE.MeshStandardMaterial({ color: 0x1f2430, roughness: 0.8 })
+    );
+    placemat.position.set(0, 1.335, 0.42);
+    placemat.receiveShadow = true;
+    tableGroup.add(placemat);
+
+    const servingPlate = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.42, 0.32, 0.02, 32),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15, metalness: 0.1 })
+    );
+    servingPlate.position.set(0, 1.345, 0.42);
+    servingPlate.receiveShadow = true;
+    servingPlate.castShadow = true;
+    tableGroup.add(servingPlate);
+
+    const cutleryMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, metalness: 0.9, roughness: 0.2 });
+    const knife = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.008, 0.36), cutleryMat);
+    knife.position.set(0.48, 1.34, 0.42);
+    tableGroup.add(knife);
+
+    const fork = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.008, 0.36), cutleryMat);
+    fork.position.set(-0.48, 1.34, 0.42);
+    tableGroup.add(fork);
+
+    const vase = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.08, 0.12, 0.35, 16),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.85 })
+    );
+    vase.position.set(0, 1.48, -0.15);
+    vase.castShadow = true;
+    tableGroup.add(vase);
+
+    const flowerGroup = new THREE.Group();
+    flowerGroup.position.set(0, 1.66, -0.15);
+    const flowerColors = [0xb71540, 0x991b1b, 0xdc2626];
+    for (let f = 0; f < 5; f++) {
+      const fl = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.055),
+        new THREE.MeshStandardMaterial({ color: flowerColors[f % 3], roughness: 0.6 })
+      );
+      const fAng = (f / 5) * Math.PI * 2;
+      fl.position.set(Math.cos(fAng) * 0.05, (f % 2) * 0.04, Math.sin(fAng) * 0.05);
+      flowerGroup.add(fl);
+    }
+    tableGroup.add(flowerGroup);
+
+    const goblet = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.02, 0.25, 16),
+      new THREE.MeshStandardMaterial({ color: 0x99ccff, roughness: 0.1, transparent: true, opacity: 0.6 })
+    );
+    goblet.position.set(0.45, 1.46, 0.1);
+    tableGroup.add(goblet);
+
+    const candleHolder = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.08, 0.12, 16),
+      new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 })
+    );
+    candleHolder.position.set(-0.35, 1.38, -0.1);
+    tableGroup.add(candleHolder);
+
+    const candleFlameMesh = new THREE.Mesh(
+      new THREE.ConeGeometry(0.025, 0.07, 8),
+      new THREE.MeshBasicMaterial({ color: 0xffaa22 })
+    );
+    candleFlameMesh.position.set(-0.35, 1.48, -0.1);
+    tableGroup.add(candleFlameMesh);
+
+    scene.add(tableGroup);
+
+    function createChair(colorHex) {
+      const chair = new THREE.Group();
+      const cushionMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.7 });
+      const woodMat = new THREE.MeshStandardMaterial({ color: 0x22130c, roughness: 0.4 });
+
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 0.72), cushionMat);
+      seat.position.y = 0.78;
+      seat.castShadow = true;
+      chair.add(seat);
+
+      const back = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.8, 0.12), cushionMat);
+      back.position.set(0, 1.2, 0.32);
+      back.castShadow = true;
+      chair.add(back);
+
+      for (let x of [-0.3, 0.3]) {
+        for (let z of [-0.3, 0.3]) {
+          const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.02, 0.75, 12), woodMat);
+          leg.position.set(x, 0.375, z);
+          leg.castShadow = true;
+          chair.add(leg);
+        }
+      }
+      return chair;
+    }
+
+    const customerChair = createChair(0x6b1426);
+    customerChair.position.set(0, 0, 1.42);
+    customerChair.rotation.y = Math.PI;
+    scene.add(customerChair);
+
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xf1c27d, roughness: 0.6 });
+    const hairMat = new THREE.MeshStandardMaterial({ color: 0x241711, roughness: 0.8 });
+
+    const customerGroup = new THREE.Group();
+    customerGroup.position.set(0, 0.78, 1.35);
+    customerGroup.rotation.y = Math.PI;
+
+    const custTorso = new THREE.Mesh(
+      new THREE.BoxGeometry(0.5, 0.65, 0.32),
+      new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6 })
+    );
+    custTorso.position.y = 0.45;
+    custTorso.castShadow = true;
+    customerGroup.add(custTorso);
+
+    const custHead = new THREE.Mesh(new THREE.SphereGeometry(0.18, 24, 24), skinMat);
+    custHead.position.set(0, 0.95, 0);
+    custHead.castShadow = true;
+    customerGroup.add(custHead);
+
+    const custHair = new THREE.Mesh(new THREE.SphereGeometry(0.19, 16, 16), hairMat);
+    custHair.position.set(0, 1.01, -0.03);
+    customerGroup.add(custHair);
+
+    const custLegL = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.14, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0x111827 })
+    );
+    custLegL.position.set(-0.16, 0.05, 0.28);
+    customerGroup.add(custLegL);
+
+    const custLegR = new THREE.Mesh(
+      new THREE.BoxGeometry(0.14, 0.14, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0x111827 })
+    );
+    custLegR.position.set(0.16, 0.05, 0.28);
+    customerGroup.add(custLegR);
+
+    const custRightArmPivot = new THREE.Group();
+    custRightArmPivot.position.set(0.3, 0.72, 0);
+
+    const custRightArm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.11, 0.42, 0.11),
+      new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+    );
+    custRightArm.position.y = -0.21;
+    custRightArmPivot.add(custRightArm);
+
+    const custRightHand = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), skinMat);
+    custRightHand.position.y = -0.44;
+    custRightArmPivot.add(custRightHand);
+    customerGroup.add(custRightArmPivot);
+
+    const custLeftArm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.11, 0.42, 0.11),
+      new THREE.MeshStandardMaterial({ color: 0x1f2937 })
+    );
+    custLeftArm.position.set(-0.3, 0.52, 0.12);
+    custLeftArm.rotation.x = -Math.PI / 3;
+    customerGroup.add(custLeftArm);
+
+    scene.add(customerGroup);
+
+    const waiterGroup = new THREE.Group();
+    waiterGroup.position.set(2.3, 0, -5.2);
+    waiterGroup.rotation.y = 0;
+
+    const waiterSuitMat = new THREE.MeshStandardMaterial({ color: 0x090a0f, roughness: 0.5 });
+    const waiterShirtMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+
+    const waiterTorso = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.72, 0.28), waiterSuitMat);
+    waiterTorso.position.y = 1.34;
+    waiterTorso.castShadow = true;
+    waiterGroup.add(waiterTorso);
+
+    const waiterShirt = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.45), waiterShirtMat);
+    waiterShirt.position.set(0, 1.38, 0.145);
+    waiterGroup.add(waiterShirt);
+
+    const bowTie = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.05, 0.03), new THREE.MeshBasicMaterial({ color: 0xd4af37 }));
+    bowTie.position.set(0, 1.62, 0.16);
+    waiterGroup.add(bowTie);
+
+    const waiterHead = new THREE.Mesh(new THREE.SphereGeometry(0.17, 24, 24), skinMat);
+    waiterHead.position.set(0, 1.88, 0);
+    waiterHead.castShadow = true;
+    waiterGroup.add(waiterHead);
+
+    const waiterHair = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), hairMat);
+    waiterHair.position.set(0, 1.94, -0.02);
+    waiterGroup.add(waiterHair);
+
+    const legLGroup = new THREE.Group();
+    legLGroup.position.set(-0.14, 0.98, 0);
+    const legLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.96, 0.15), waiterSuitMat);
+    legLMesh.position.y = -0.48;
+    legLMesh.castShadow = true;
+    legLGroup.add(legLMesh);
+    waiterGroup.add(legLGroup);
+
+    const legRGroup = new THREE.Group();
+    legRGroup.position.set(0.14, 0.98, 0);
+    const legRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.96, 0.15), waiterSuitMat);
+    legRMesh.position.y = -0.48;
+    legRMesh.castShadow = true;
+    legRGroup.add(legRMesh);
+    waiterGroup.add(legRGroup);
+
+    const waiterArmL = new THREE.Group();
+    waiterArmL.position.set(-0.29, 1.6, 0);
+    const armLMesh = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.55, 0.11), waiterSuitMat);
+    armLMesh.position.y = -0.27;
+    waiterArmL.add(armLMesh);
+    waiterGroup.add(waiterArmL);
+
+    const waiterArmR = new THREE.Group();
+    waiterArmR.position.set(0.29, 1.6, 0);
+    const armRMesh = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.55, 0.11), waiterSuitMat);
+    armRMesh.position.y = -0.27;
+    waiterArmR.add(armRMesh);
+    waiterGroup.add(waiterArmR);
+
+    const notepadGroup = new THREE.Group();
+    const notepadMesh = new THREE.Mesh(
+      new THREE.BoxGeometry(0.22, 0.32, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x2c3e50, roughness: 0.5 })
+    );
+    const paperMesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.18, 0.28),
+      new THREE.MeshBasicMaterial({ color: 0xfdfbf7 })
+    );
+    paperMesh.position.z = 0.012;
+    notepadGroup.add(notepadMesh);
+    notepadGroup.add(paperMesh);
+    notepadGroup.position.set(0, -0.48, 0.2);
+    notepadGroup.rotation.x = -Math.PI / 4;
+    notepadGroup.visible = false;
+    waiterArmL.add(notepadGroup);
+
+    const servingTrayGroup = new THREE.Group();
+    const trayMat = new THREE.MeshStandardMaterial({ color: 0xf0f0f0, metalness: 0.95, roughness: 0.15 });
+
+    const traySalver = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.02, 32), trayMat);
+    traySalver.castShadow = true;
+    servingTrayGroup.add(traySalver);
+
+    const clocheDome = new THREE.Mesh(
+      new THREE.SphereGeometry(0.32, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+      trayMat
+    );
+    clocheDome.position.y = 0.01;
+    clocheDome.castShadow = true;
+    servingTrayGroup.add(clocheDome);
+
+    const clocheHandle = new THREE.Mesh(new THREE.SphereGeometry(0.045, 16, 16), trayMat);
+    clocheHandle.position.y = 0.35;
+    servingTrayGroup.add(clocheHandle);
+
+    servingTrayGroup.position.set(0, -0.4, 0.38);
+    servingTrayGroup.visible = false;
+    waiterArmL.add(servingTrayGroup);
+
+    scene.add(waiterGroup);
+
+    function createPizzaMesh() {
+      const pizza = new THREE.Group();
+      const crust = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.34, 0.34, 0.03, 32),
+        new THREE.MeshStandardMaterial({ color: 0xc8963e, roughness: 0.8 })
+      );
+      pizza.add(crust);
+      const cheese = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.31, 0.31, 0.035, 32),
+        new THREE.MeshStandardMaterial({ color: 0xf5d061, roughness: 0.5 })
+      );
+      pizza.add(cheese);
+      const pepMat = new THREE.MeshStandardMaterial({ color: 0xa82810, roughness: 0.6 });
+      const basilMat = new THREE.MeshStandardMaterial({ color: 0x27ae60, roughness: 0.7 });
+
+      for (let i = 0; i < 7; i++) {
+        const ang = (i / 7) * Math.PI * 2;
+        const rad = 0.16 + Math.random() * 0.07;
+        const pep = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.038, 16), pepMat);
+        pep.position.set(Math.cos(ang) * rad, 0.005, Math.sin(ang) * rad);
+        pizza.add(pep);
+
+        if (i % 2 === 0) {
+          const basil = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.01, 0.03), basilMat);
+          basil.position.set(Math.cos(ang + 0.3) * (rad * 0.7), 0.02, Math.sin(ang + 0.3) * (rad * 0.7));
+          basil.rotation.y = Math.random();
+          pizza.add(basil);
+        }
+      }
+      pizza.scale.set(0.9, 0.9, 0.9);
+      return pizza;
+    }
+
+    function createBurgerMesh() {
+      const burger = new THREE.Group();
+      const bunMat = new THREE.MeshStandardMaterial({ color: 0xce8538, roughness: 0.7 });
+      const pattyMat = new THREE.MeshStandardMaterial({ color: 0x4a2e18, roughness: 0.9 });
+      const cheeseMat = new THREE.MeshStandardMaterial({ color: 0xf1c40f, roughness: 0.5 });
+      const lettuceMat = new THREE.MeshStandardMaterial({ color: 0x2ecc71, roughness: 0.8 });
+
+      const botBun = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.19, 0.05, 24), bunMat);
+      botBun.position.y = 0.025;
+      burger.add(botBun);
+
+      const patty = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.21, 0.06, 24), pattyMat);
+      patty.position.y = 0.07;
+      burger.add(patty);
+
+      const cheese = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.015, 0.3), cheeseMat);
+      cheese.position.y = 0.105;
+      cheese.rotation.y = 0.4;
+      burger.add(cheese);
+
+      const lettuce = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.025, 16), lettuceMat);
+      lettuce.position.y = 0.125;
+      burger.add(lettuce);
+
+      const topBun = new THREE.Mesh(
+        new THREE.SphereGeometry(0.2, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+        bunMat
+      );
+      topBun.position.y = 0.135;
+      topBun.scale.set(1, 0.65, 1);
+      burger.add(topBun);
+
+      const fryMat = new THREE.MeshStandardMaterial({ color: 0xf39c12, roughness: 0.5 });
+      for (let f = 0; f < 8; f++) {
+        const fry = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.15, 0.02), fryMat);
+        fry.position.set(-0.25 + Math.random() * 0.08, 0.06, -0.05 + Math.random() * 0.1);
+        fry.rotation.set((Math.random() - 0.5) * 0.4, 0, (Math.random() - 0.5) * 0.4);
+        burger.add(fry);
+      }
+      return burger;
+    }
+
+    function createPastaMesh() {
+      const pasta = new THREE.Group();
+      const pastaMat = new THREE.MeshStandardMaterial({ color: 0xf9e79f, roughness: 0.6 });
+      const mound = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 12), pastaMat);
+      mound.scale.set(1.4, 0.45, 1.4);
+      mound.position.y = 0.05;
+      pasta.add(mound);
+
+      const mushMat = new THREE.MeshStandardMaterial({ color: 0x5d4037, roughness: 0.8 });
+      const parsleyMat = new THREE.MeshStandardMaterial({ color: 0x27ae60 });
+      for (let i = 0; i < 9; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 0.16;
+        const mush = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.02, 12), mushMat);
+        mush.position.set(Math.cos(angle) * radius, 0.09, Math.sin(angle) * radius);
+        pasta.add(mush);
+
+        const flake = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.005, 0.02), parsleyMat);
+        flake.position.set(Math.cos(angle + 0.4) * radius, 0.11, Math.sin(angle + 0.4) * radius);
+        pasta.add(flake);
+      }
+      return pasta;
+    }
+
+    const foodModels = [
+      createPizzaMesh(),
+      createBurgerMesh(),
+      createPastaMesh()
+    ];
+
+    let currentServedFood = null;
+
+    const steamParticleCount = 40;
+    const steamGeometry = new THREE.BufferGeometry();
+    const steamPositions = new Float32Array(steamParticleCount * 3);
+
+    for (let i = 0; i < steamParticleCount; i++) {
+      steamPositions[i * 3 + 0] = (Math.random() - 0.5) * 0.3;
+      steamPositions[i * 3 + 1] = 1.38 + Math.random() * 0.6;
+      steamPositions[i * 3 + 2] = 0.42 + (Math.random() - 0.5) * 0.3;
+    }
+
+    steamGeometry.setAttribute('position', new THREE.BufferAttribute(steamPositions, 3));
+
+    const steamMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.07,
+      transparent: true,
+      opacity: 0.0,
+      depthWrite: false
+    });
+
+    const steamSystem = new THREE.Points(steamGeometry, steamMaterial);
+    scene.add(steamSystem);
+
+    function updateSteam() {
+      if (steamMaterial.opacity > 0.01) {
+        const pos = steamGeometry.attributes.position.array;
+        for (let i = 0; i < steamParticleCount; i++) {
+          pos[i * 3 + 1] += 0.005;
+          if (pos[i * 3 + 1] > 2.2) {
+            pos[i * 3 + 1] = 1.4;
+            pos[i * 3 + 0] = (Math.random() - 0.5) * 0.25;
+            pos[i * 3 + 2] = 0.42 + (Math.random() - 0.5) * 0.25;
+          }
+        }
+        steamGeometry.attributes.position.needsUpdate = true;
+      }
+    }
+
+    let selectedDishIndex = 0;
+    let isOrderingInProgress = false;
+
+    const dishData = [
+      { name: "Woodfired Truffle Pizza", price: "$28" },
+      { name: "Artisan Angus Burger", price: "$24" },
+      { name: "Creamy Tagliatelle Alfredo", price: "$26" }
+    ];
+
+    function selectDish(index, element) {
+      if (isOrderingInProgress) return;
+      selectedDishIndex = index;
+      document.querySelectorAll('.dish-item').forEach(el => el.classList.remove('selected'));
+      element.classList.add('selected');
+    }
+
+    function setStatus(msg) {
+      document.getElementById('status-message').textContent = msg;
+    }
+
+    function showSpeech(text, duration = 3000) {
+      const bubble = document.getElementById('speech-bubble');
+      bubble.textContent = text;
+      bubble.style.opacity = '1';
+      setTimeout(() => {
+        bubble.style.opacity = '0';
+      }, duration);
+    }
+
+    function updateSpeechBubblePos() {
+      const bubble = document.getElementById('speech-bubble');
+      if (bubble.style.opacity === '1') {
+        const headWorld = new THREE.Vector3();
+        waiterHead.getWorldPosition(headWorld);
+        headWorld.y += 0.4;
+        const screenPos = headWorld.clone().project(camera);
+        const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-(screenPos.y * 0.5) + 0.5) * window.innerHeight;
+        bubble.style.left = `${x}px`;
+        bubble.style.top = `${y}px`;
+      }
+    }
+
+    let isWalking = false;
+    let walkClock = 0;
+
+    function animateWaiterLegs(delta) {
+      if (isWalking) {
+        walkClock += delta * 9;
+        legLGroup.rotation.x = Math.sin(walkClock) * 0.55;
+        legRGroup.rotation.x = -Math.sin(walkClock) * 0.55;
+
+        if (Math.sin(walkClock) > 0.95 || Math.sin(walkClock) < -0.95) {
+          playSound('footstep');
+        }
+      } else {
+        legLGroup.rotation.x = 0;
+        legRGroup.rotation.x = 0;
+      }
+    }
+
+    function runTween(duration, onUpdate, onDone) {
+      const start = performance.now();
+      function loop(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1.0);
+        const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
+        onUpdate(ease, progress);
+        if (progress < 1.0) {
+          requestAnimationFrame(loop);
+        } else if (onDone) {
+          onDone();
+        }
+      }
+      requestAnimationFrame(loop);
+    }
+
+    function initiateOrderSequence() {
+      if (isOrderingInProgress) return;
+      isOrderingInProgress = true;
+      document.getElementById('btn-order').disabled = true;
+
+      if (currentServedFood) {
+        scene.remove(currentServedFood);
+        currentServedFood = null;
+        steamMaterial.opacity = 0;
+      }
+
+      setStatus("Customer summoning waiter to Table 4...");
+      playSound('bell');
+
+      runTween(500, (e) => {
+        custRightArmPivot.rotation.x = -Math.PI / 1.6 * e;
+        custRightArmPivot.rotation.z = -0.35 * e;
+      }, () => {
+        setTimeout(() => {
+          custRightArmPivot.rotation.set(0, 0, 0);
+          step2_waiterWalksToTableSide();
+        }, 300);
+      });
+    }
+
+    function step2_waiterWalksToTableSide() {
+      setStatus("Waiter walking along the aisle to Table 4...");
+      isWalking = true;
+
+      waiterGroup.lookAt(2.3, 0, -1.0);
+      const start1 = waiterGroup.position.clone();
+      const end1 = new THREE.Vector3(2.3, 0, -1.0);
+
+      runTween(1400, (e) => {
+        waiterGroup.position.lerpVectors(start1, end1, e);
+      }, () => {
+        waiterGroup.lookAt(2.3, 0, 0.45);
+        const start2 = waiterGroup.position.clone();
+        const end2 = new THREE.Vector3(2.3, 0, 0.45);
+
+        runTween(1200, (e) => {
+          waiterGroup.position.lerpVectors(start2, end2, e);
+        }, () => {
+          waiterGroup.lookAt(1.45, 0, 0.45);
+          const start3 = waiterGroup.position.clone();
+          const end3 = new THREE.Vector3(1.45, 0, 0.45);
+
+          runTween(800, (e) => {
+            waiterGroup.position.lerpVectors(start3, end3, e);
+          }, () => {
+            isWalking = false;
+            runTween(350, (e) => {
+              waiterGroup.rotation.y = -Math.PI / 2.3 * e;
+            }, () => {
+              step3_waiterTakesOrder();
+            });
+          });
+        });
+      });
+    }
+
+    function step3_waiterTakesOrder() {
+      const dish = dishData[selectedDishIndex];
+      setStatus(`Waiter writing down order: ${dish.name}...`);
+      notepadGroup.visible = true;
+
+      runTween(500, (e) => {
+        waiterArmR.rotation.x = -Math.PI / 3.2 * e;
+        waiterArmR.rotation.y = -0.35 * e;
+        waiterArmL.rotation.x = -Math.PI / 3.8 * e;
+      }, () => {
+        showSpeech(`"Excellent choice! 1x ${dish.name}. I'll inform Chef instantly."`, 3500);
+        playSound('write');
+        setTimeout(() => playSound('write'), 600);
+        setTimeout(() => playSound('write'), 1200);
+
+        setTimeout(() => {
+          notepadGroup.visible = false;
+          waiterArmR.rotation.set(0, 0, 0);
+          waiterArmL.rotation.set(0, 0, 0);
+          step4_waiterWalksToKitchen();
+        }, 2500);
+      });
+    }
+
+    function step4_waiterWalksToKitchen() {
+      setStatus("Order sent! Waiter returning through the aisle to kitchen...");
+      isWalking = true;
+
+      waiterGroup.lookAt(2.3, 0, 0.45);
+      const start1 = waiterGroup.position.clone();
+      const end1 = new THREE.Vector3(2.3, 0, 0.45);
+
+      runTween(800, (e) => {
+        waiterGroup.position.lerpVectors(start1, end1, e);
+      }, () => {
+        waiterGroup.lookAt(2.3, 0, -1.0);
+        const start2 = waiterGroup.position.clone();
+        const end2 = new THREE.Vector3(2.3, 0, -1.0);
+
+        runTween(1200, (e) => {
+          waiterGroup.position.lerpVectors(start2, end2, e);
+        }, () => {
+          waiterGroup.lookAt(2.3, 0, -5.2);
+          const start3 = waiterGroup.position.clone();
+          const end3 = new THREE.Vector3(2.3, 0, -5.2);
+
+          runTween(1300, (e) => {
+            waiterGroup.position.lerpVectors(start3, end3, e);
+          }, () => {
+            isWalking = false;
+            waiterGroup.rotation.y = 0;
+            step5_kitchenCookingSimulation();
+          });
+        });
+      });
+    }
+
+    function step5_kitchenCookingSimulation() {
+      const modal = document.getElementById('cooking-modal');
+      const fill = document.getElementById('progress-fill');
+      const text = document.getElementById('progress-text');
+      const title = document.getElementById('cooking-title');
+
+      const dish = dishData[selectedDishIndex];
+      title.textContent = `Preparing: ${dish.name}`;
+      modal.classList.add('active');
+      setStatus("Kitchen is preparing your order...");
+
+      let progress = 0;
+      playSound('sizzle');
+
+      const sizzleInterval = setInterval(() => {
+        playSound('sizzle');
+      }, 900);
+
+      const cookInterval = setInterval(() => {
+        progress += 4;
+        fill.style.width = `${progress}%`;
+        text.textContent = `${progress}%`;
+
+        if (progress >= 100) {
+          clearInterval(cookInterval);
+          clearInterval(sizzleInterval);
+          setTimeout(() => {
+            modal.classList.remove('active');
+            step6_waiterServesFood();
+          }, 400);
+        }
+      }, 100);
+    }
+
+    function step6_waiterServesFood() {
+      setStatus("Order ready! Waiter bringing the covered tray along the aisle...");
+      servingTrayGroup.visible = true;
+      servingTrayGroup.position.set(0, -0.28, 0.35);
+      clocheDome.position.y = 0.01;
+      clocheHandle.position.y = 0.35;
+
+      waiterArmL.rotation.x = -Math.PI / 2.8;
+      waiterArmR.rotation.x = -Math.PI / 2.8;
+
+      isWalking = true;
+      waiterGroup.lookAt(2.3, 0, -1.0);
+
+      const start1 = waiterGroup.position.clone();
+      const end1 = new THREE.Vector3(2.3, 0, -1.0);
+
+      runTween(1400, (e) => {
+        waiterGroup.position.lerpVectors(start1, end1, e);
+      }, () => {
+        waiterGroup.lookAt(2.3, 0, 0.45);
+        const start2 = waiterGroup.position.clone();
+        const end2 = new THREE.Vector3(2.3, 0, 0.45);
+
+        runTween(1200, (e) => {
+          waiterGroup.position.lerpVectors(start2, end2, e);
+        }, () => {
+          waiterGroup.lookAt(1.45, 0, 0.45);
+          const start3 = waiterGroup.position.clone();
+          const end3 = new THREE.Vector3(1.45, 0, 0.45);
+
+          runTween(800, (e) => {
+            waiterGroup.position.lerpVectors(start3, end3, e);
+          }, () => {
+            isWalking = false;
+            runTween(350, (e) => {
+              waiterGroup.rotation.y = -Math.PI / 2.3 * e;
+            }, () => {
+              step7_unveilAndServe();
+            });
+          });
+        });
+      });
+    }
+
+    function step7_unveilAndServe() {
+      setStatus("Placing meal on table & lifting the cloche...");
+
+      currentServedFood = foodModels[selectedDishIndex].clone();
+      currentServedFood.position.set(0, 1.365, 0.42);
+      scene.add(currentServedFood);
+
+      playSound('cloche');
+      runTween(1200, (e) => {
+        clocheDome.position.y = 0.01 + 0.8 * e;
+        clocheHandle.position.y = 0.35 + 0.8 * e;
+      }, () => {
+        steamMaterial.opacity = 0.65;
+        showSpeech(`"Bon Appétit! Enjoy your ${dishData[selectedDishIndex].name}."`, 4000);
+        setStatus("Meal served! Enjoy your gourmet dish.");
+
+        runTween(1400, (e) => {
+          custHead.rotation.x = Math.sin(e * Math.PI * 4) * 0.25;
+        });
+
+        setTimeout(() => {
+          servingTrayGroup.visible = false;
+          waiterArmL.rotation.set(0, 0, 0);
+          waiterArmR.rotation.set(0, 0, 0);
+
+          isWalking = true;
+          waiterGroup.lookAt(2.3, 0, 0.45);
+          const start1 = waiterGroup.position.clone();
+          const end1 = new THREE.Vector3(2.3, 0, 0.45);
+
+          runTween(800, (e) => {
+            waiterGroup.position.lerpVectors(start1, end1, e);
+          }, () => {
+            waiterGroup.lookAt(2.3, 0, -1.0);
+            const start2 = waiterGroup.position.clone();
+            const end2 = new THREE.Vector3(2.3, 0, -1.0);
+
+            runTween(1200, (e) => {
+              waiterGroup.position.lerpVectors(start2, end2, e);
+            }, () => {
+              waiterGroup.lookAt(2.3, 0, -5.2);
+              const start3 = waiterGroup.position.clone();
+              const end3 = new THREE.Vector3(2.3, 0, -5.2);
+
+              runTween(1300, (e) => {
+                waiterGroup.position.lerpVectors(start3, end3, e);
+              }, () => {
+                isWalking = false;
+                waiterGroup.rotation.y = 0;
+                isOrderingInProgress = false;
+                document.getElementById('btn-order').disabled = false;
+                setStatus("Dining session complete. Feel free to reorder or switch camera angles!");
+              });
+            });
+          });
+        }, 3200);
+      });
+    }
+
+    function setCameraView(preset) {
+      document.querySelectorAll('.cam-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = Array.from(document.querySelectorAll('.cam-btn')).find(b => b.textContent.toLowerCase().includes(preset.toLowerCase()));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      let targetPos, lookAtPos;
+
+      if (preset === 'table') {
+        targetPos = { x: 0, y: 2.1, z: 2.3 };
+        lookAtPos = { x: 0, y: 1.35, z: 0.42 };
+      } else if (preset === 'waiter') {
+        targetPos = { x: 3.5, y: 2.8, z: -3.8 };
+        lookAtPos = { x: 1.0, y: 1.4, z: -5.5 };
+      } else if (preset === 'cinematic') {
+        targetPos = { x: -3.5, y: 2.2, z: 3.5 };
+        lookAtPos = { x: 0, y: 1.2, z: 0.6 };
+      } else {
+        targetPos = { x: 0, y: 5.0, z: 7.8 };
+        lookAtPos = { x: 0, y: 1.2, z: 0 };
+      }
+
+      const startPos = camera.position.clone();
+      const endPos = new THREE.Vector3(targetPos.x, targetPos.y, targetPos.z);
+      const startTarget = controls.target.clone();
+      const endTarget = new THREE.Vector3(lookAtPos.x, lookAtPos.y, lookAtPos.z);
+
+      runTween(1400, (e) => {
+        camera.position.lerpVectors(startPos, endPos, e);
+        controls.target.lerpVectors(startTarget, endTarget, e);
+      });
+    }
+
+    function resetDiningSession() {
+      if (isOrderingInProgress) return;
+      if (currentServedFood) {
+        scene.remove(currentServedFood);
+        currentServedFood = null;
+      }
+      steamMaterial.opacity = 0;
+      waiterGroup.position.set(2.3, 0, -5.2);
+      waiterGroup.rotation.y = 0;
+      waiterArmL.rotation.set(0, 0, 0);
+      waiterArmR.rotation.set(0, 0, 0);
+      servingTrayGroup.visible = false;
+      notepadGroup.visible = false;
+      setCameraView('overview');
+      setStatus("Customer seated at Table 4. Select a dish to place an order.");
+    }
+
+    const clock = new THREE.Clock();
+
+    function renderLoop() {
+      requestAnimationFrame(renderLoop);
+      const delta = clock.getDelta();
+
+      controls.update();
+
+      animateWaiterLegs(delta);
+
+      candleLight.intensity = 1.1 + Math.sin(clock.getElapsedTime() * 12) * 0.15;
+
+      updateSteam();
+
+      updateSpeechBubblePos();
+
+      renderer.render(scene, camera);
+    }
+
+    renderLoop();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
