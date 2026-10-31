@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyberpunk Glitch Neon Button</title>
+  <link rel="stylesheet">
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #08080c;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cyber-btn {
+  --glitch-cyan: #00f0ff;
+  --glitch-pink: #ff003c;
+  --btn-bg: #ffe600;
+  position: relative;
+  padding: 18px 46px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #000;
+  background: var(--btn-bg);
+  border: none;
+  outline: none;
+  cursor: pointer;
+  clip-path: polygon(
+    0 0,
+    calc(100% - 18px) 0,
+    100% 18px,
+    100% 100%,
+    18px 100%,
+    0 calc(100% - 18px)
+  );
+  box-shadow: 6px 0 0 var(--glitch-cyan);
+  transition: background 0.2s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+}
+
+.tag {
+  position: absolute;
+  bottom: 3px;
+  right: 14px;
+  font-size: 0.55rem;
+  letter-spacing: 1px;
+  color: #000;
+  opacity: 0.75;
+  font-weight: 900;
+}
+
+.cyber-btn::before,
+.cyber-btn::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cyber-btn:hover {
+  background: #ffffff;
+  color: #000000;
+  box-shadow: -4px 0 0 var(--glitch-cyan), 4px 0 0 var(--glitch-pink);
+}
+
+.cyber-btn:hover::before {
+  opacity: 1;
+  background: var(--glitch-pink);
+  color: #fff;
+  transform: translate(-3px, 2px);
+  clip-path: polygon(0 20%, 100% 20%, 100% 50%, 0 50%);
+  animation: glitch-anim-1 0.4s steps(2, start) infinite;
+}
+
+.cyber-btn:hover::after {
+  opacity: 1;
+  background: var(--glitch-cyan);
+  color: #000;
+  transform: translate(3px, -2px);
+  clip-path: polygon(0 60%, 100% 60%, 100% 85%, 0 85%);
+  animation: glitch-anim-2 0.4s steps(2, start) infinite;
+}
+
+.cyber-btn:active {
+  transform: scale(0.97);
+  box-shadow: -2px 0 0 var(--glitch-cyan), 2px 0 0 var(--glitch-pink);
+}
+
+@keyframes glitch-anim-1 {
+  0% {
+    clip-path: polygon(0 15%, 100% 15%, 100% 40%, 0 40%);
+    transform: translate(-4px, 2px);
+  }
+  50% {
+    clip-path: polygon(0 65%, 100% 65%, 100% 90%, 0 90%);
+    transform: translate(3px, -1px);
+  }
+  100% {
+    clip-path: polygon(0 30%, 100% 30%, 100% 55%, 0 55%);
+    transform: translate(-2px, 3px);
+  }
+}
+
+@keyframes glitch-anim-2 {
+  0% {
+    clip-path: polygon(0 50%, 100% 50%, 100% 75%, 0 75%);
+    transform: translate(3px, -2px);
+  }
+  50% {
+    clip-path: polygon(0 10%, 100% 10%, 100% 35%, 0 35%);
+    transform: translate(-3px, 1px);
+  }
+  100% {
+    clip-path: polygon(0 70%, 100% 70%, 100% 95%, 0 95%);
+    transform: translate(2px, -2px);
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="cyber-btn" data-text="INITIALIZE">
+      <span class="btn-text">INITIALIZE</span>
+      <span class="tag">R-2049</span>
+    </button>
+  </div>
+  <script>
+    const btn = document.querySelector(".cyber-btn");
+const textSpan = btn.querySelector(".btn-text");
+const originalText = btn.getAttribute("data-text");
+const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*@!$";
+
+let interval = null;
+
+btn.addEventListener("mouseenter", () => {
+  let iteration = 0;
+  clearInterval(interval);
+
+  interval = setInterval(() => {
+    textSpan.innerText = originalText
+      .split("")
+      .map((char, index) => {
+        if (index < iteration) {
+          return originalText[index];
+        }
+        return alphabet[Math.floor(Math.random() * alphabet.length)];
+      })
+      .join("");
+
+    if (iteration >= originalText.length) {
+      clearInterval(interval);
+    }
+
+    iteration += 1 / 3;
+  }, 30);
+});
+
+btn.addEventListener("mouseleave", () => {
+  clearInterval(interval);
+  textSpan.innerText = originalText;
+});
+  </script>
+</body>
+</html>
